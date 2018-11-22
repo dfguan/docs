@@ -1,2 +1,6 @@
-# Phd-Forum
-poster(s) for Phd forum at HIT
+# posters
+poster library
+
+# directory structure
+- hit\_phd\_forum : poster for Phd forum at HIT
+
