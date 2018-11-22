@@ -19,12 +19,15 @@
 %----------------------------------------------------------------------------------------
 
 \documentclass[a0,portrait]{a0poster}
-%\setlength{\paperwidth}{80cm}
-%\setlength{\paperheight}{180cm}
+
+\usepackage{geometry}
+\geometry{paperwidth=80cm,paperheight=121cm, left=6.5cm,right=2cm, top = 5cm, bottom = 0cm}
 
 \usepackage{multicol} % This is so we can have multiple columns of text side-by-side
 \columnsep=100pt % This is the amount of white space between the columns in the poster
 \columnseprule=3pt % This is the thickness of the black line between the columns in the poster
+%\setlength{\paperwidth}{90cm}
+%\setlength{\paperheight}{150cm}
 
 \usepackage[svgnames]{xcolor} % Specify colors by their 'svgnames', for a full list of all colors available see here: http://www.latextemplates.com/svgnames-colors
 
@@ -38,7 +41,6 @@
 \usepackage{amsfonts, amsmath, amsthm, amssymb} % For math fonts, symbols and environments
 \usepackage{wrapfig} % Allows wrapping text around tables and figures
 \begin{document}
-
 %----------------------------------------------------------------------------------------
 %	POSTER HEADER 
 %----------------------------------------------------------------------------------------
@@ -48,19 +50,42 @@
 % The second is 25% wide and houses a logo for your university/organization or a photo of you
 % The widths of these boxes can be easily edited to accommodate your content as you see fit
 
-\begin{minipage}[b]{.8\linewidth}
+%\begin{minipage}[b]{0.15\linewidth}
+%\includegraphics[width=2cm]{hit_logo.png}
+%\end{minipage}
+%
+%\begin{minipage}[b]{.8\linewidth}
+%\Huge \color{NavyBlue} \textbf{deSPI: efficient classification of metagenomics reads with lightweight de Bruijn graph-based reference indexing} \color{Black}\\ % Title
+%%\Huge\textit{An Explora}\\[2cm] % Subtitle
+%\\
+%\huge \textbf{Dengfeng Guan \& Bo Liu \& Yadong Wang}\\[0.5cm] % Author(s)
+%\huge Dept. of Computer Science and Technology, Harbin Institute of Technology\\[0.4cm] % University/organization
+%\Large \texttt{dfguan@hit.edu.cn}\\
+%\end{minipage}
+%
+\
+
+\begin{tabular}{cc}
+
+\begin{minipage}{.15\textwidth}
+\includegraphics[width=12cm]{hit_logo}
+%\epsfig{file=crestwhite.eps,width=\figsize, height=\figsize}
+\end{minipage} &
+
+ \begin{minipage}{.8\textwidth}
+ \raisebox{.07\baselineskip}{\ }
+  \begin{center}
 \Huge \color{NavyBlue} \textbf{deSPI: efficient classification of metagenomics reads with lightweight de Bruijn graph-based reference indexing} \color{Black}\\ % Title
-%\Huge\textit{An Explora}\\[2cm] % Subtitle
-\\
+
 \huge \textbf{Dengfeng Guan \& Bo Liu \& Yadong Wang}\\[0.5cm] % Author(s)
 \huge Dept. of Computer Science and Technology, Harbin Institute of Technology\\[0.4cm] % University/organization
 \Large \texttt{dfguan@hit.edu.cn}\\
-\end{minipage}
-%
-%\begin{minipage}[b]{0.25\linewidth}
-%\includegraphics[width=20cm]{logo.png}\\
-%\end{minipage}
+ \end{center}
+ \raisebox{.07\baselineskip}{\ }
+  \end{minipage} \\ 
+\end{tabular}
 
+%\rule{\textwidth}{.1cm}
 \vspace{1cm} % A bit of extra whitespace between the header and poster content
 
 %----------------------------------------------------------------------------------------
@@ -74,7 +99,6 @@
 \color{Navy} % Navy color for the abstract
 
 \begin{abstract}
-
 One of the core problems in metagenomics is the classification of shotgun sequencing reads to identify species present in samples. Many supervised classification tools have been developed recently, but they either consume large memory or large computation time. Herein we propose a new classification method, de Bruijn Graph-based Species Identifier (deSPI), which takes advantage of de Bruijn graph and FM-index data structures and a hierarchical top-down strategy to do classification. The experimental results suggest that deSPI uses much less memory than Clark and Kraken and classifies reads much faster than Centrifuge and Kaiju, while maintaining a comparable sensitivity and accuracy.
 \end{abstract}
 
@@ -114,15 +138,16 @@ In recent years, numerious supervised metagenomics classification tools that sca
 %----------------------------------------------------------------------------------------
 
 \section*{Methods}
+deSPI infers taxa of reads through a FM-index and hierarchical top-down taxonomic classification. In the indexing phase (Figure 1), deSPI takes a reference database and its corresponding phylogenetic tree as inputs. Instead of indexing original genomic sequences, it builds a FM-index of unitigs from the de Bruijn graph of references (RdBG) for both strands \cite{Liu2016-vy}, and each unitig is labeled with a taxon. In the classification phase (Figure 2), it applies a sparse seeding strategy to find maximal exact matches between reads and unitigs (U-MEMs) and infer taxa of the reads with a hierarchical top-down taxonomic classification strategy. 
 
 \begin{center}\vspace{1cm}
 \includegraphics[width=0.7\linewidth]{irg1}
-\captionof{figure}{\color{Green} Index Reference Genomes. (\textbf{A}) A library of reference genomes. (\textbf{B}) Build de Bruijn Graph (RdBG) of the reference database. (\textbf{C}) Obtain unitigs from RdBG, each unitig is labeled with a LCA of the organisms containing the unitig. (\textbf{D}) Obtain U-string through joining all unitigs together with a delimiter \#, perform Burrow-Wheeler Transformation on U-string and generate FM-index. }
+\captionof{figure}{Index Reference Genomes. (\textbf{A}) A library of reference genomes. (\textbf{B}) Build de Bruijn Graph (RdBG) of the reference database. (\textbf{C}) Obtain unitigs from RdBG, each unitig is labeled with a LCA of the organisms containing the unitig. (\textbf{D}) Obtain U-string through joining all unitigs together with a delimiter \#, perform Burrow-Wheeler Transformation on U-string and generate FM-index. }
 \end{center}\vspace{1cm}
 
 \begin{center}\vspace{1cm}
 \includegraphics[width=0.7\linewidth]{cor1}
-\captionof{figure}{\color{Green} Classification of a read. The figure illustrates the deSPI classification algorithm using seed length 25. (\textbf{A}) deSPI performs backward search along the read, find all U-MEMs larger than the minimum seed length. (\textbf{B}) Nodes receiving hits (highlighted in cyan) form a pruned phylogenetic tree, deSPI traverses the tree to figure out the classification path (nodes and edges highlighted in cyan).}
+\captionof{figure}{Classification of a read. The figure illustrates the deSPI classification algorithm using seed length 25. (\textbf{A}) deSPI performs backward search along the read, find all U-MEMs larger than the minimum seed length. (\textbf{B}) Nodes receiving hits (highlighted in cyan) form a pruned phylogenetic tree, deSPI traverses the tree to figure out the classification path (nodes and edges highlighted in cyan).}
 \end{center}\vspace{1cm}
 %Fusce magna risus, molestie ut porttitor in, consectetur sed mi. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Pellentesque consectetur blandit pellentesque. Sed odio justo, viverra nec porttitor vel, lacinia a nunc. Suspendisse pulvinar euismod arcu, sit amet accumsan enim fermentum quis. In id mauris ut dui feugiat egestas. Vestibulum ac turpis lacinia nisl commodo sagittis eget sit amet sapien.
 
@@ -166,8 +191,9 @@ In recent years, numerious supervised metagenomics classification tools that sca
 %----------------------------------------------------------------------------------------
 
 \section*{Results}
-Three experiments were carried out on simulated and real datasets, to assess the feasibility of deSPI. Four state-of-the-art metagenomics classification tools, Centrifuge, Clark, Kaiju and Kraken are tested on the same datasets for comparison. The \textit{k-mer} used for indices of Clark and Kraken, and RdBG of deSPI is 31. deSPI was tested with seed lengths of 24, 28 and 31, while the other tools were ran with their default settings. For simulated data and real sequencing data from single individuals, the test were run on a server with 1TB of Random Access Memory (RAM), eight 2.0 GHZ Intel Xeon E7-4820 CPUs (64 cores). For the real metagenomic data, the test were performed on a server with 767.8 GB of RAM, fifty-six 2.6 GHZ Intel Xeon E5-2690 CPUs (784 cores). 
-
+Three experiments were carried out on simulated and real datasets, to assess the feasibility of deSPI. Four state-of-the-art metagenomics classification tools, Centrifuge, Clark, Kaiju and Kraken are tested on the same datasets for comparison. The \textit{k-mer} used for indices of Clark and Kraken, and RdBG of deSPI is 31. deSPI was tested with seed lengths of 24, 28 and 31, while the other tools were ran with their default settings. For simulated data and real sequencing data from single individuals, the tests were run on a server with 1TB of Random Access Memory (RAM), eight 2.0 GHZ Intel Xeon E7-4820 CPUs (64 cores). For the real metagenomic data, the test was performed on a server with 767.8 GB of RAM, fifty-six 2.6 GHZ Intel Xeon E5-2690 CPUs (784 cores). 
+%\section*{Results}
+%Three experiments were carried out on simulated and real datasets, to assess the feasibility of deSPI. Four state-of-the-art metagenomics classification tools, Centrifuge, Clark, Kaiju and Kraken are tested on the same datasets for comparison. The \textit{k-mer} used for indices of Clark and Kraken, and RdBG of deSPI is 31. deSPI was tested with seed lengths of 24, 28 and 31, while the other tools were ran with their default settings. For simulated data and real sequencing data from single individuals, the test were run on a server with 1TB of Random Access Memory (RAM), eight 2.0 GHZ Intel Xeon E7-4820 CPUs (64 cores). For the real metagenomic data, the test were performed on a server with 767.8 GB of RAM, fifty-six 2.6 GHZ Intel Xeon E5-2690 CPUs (784 cores). 
 \begin{center}\vspace{1cm}
 \small
 \begin{tabular}{cccccc}
@@ -185,7 +211,7 @@ Kaiju & & 40.23/95.56/56.62 & 63.38/98.17/77.03 & 14 & 195 \\
 Kraken & 31mer & 71.83/99.26/83.34 & 89.39/99.78/94.30 & 126 & 722 \\
 \bottomrule
 \end{tabular}
-\captionof{table}{\color{Green} Classification performance for deSPI, Centrifuge, Clark, Kaiju and Kraken on simulated reads}
+\captionof{table}{Classification performance for deSPI, Centrifuge, Clark, Kaiju and Kraken on simulated reads}
 \end{center}\vspace{1cm}
 
 \begin{center}\vspace{1cm}
@@ -207,7 +233,7 @@ Kaiju	 & & 19.09/91.18/31.57 & 30.11/95.44/45.78 & 262 & 9.21/62.14/16.04 & 42.8
 Kraken & 31mer & 33.89/97.32/50.27 & 47.29/98.66/63.93 & 1143 & 20.89/73.70/32.55 & 54.92/97.27/70.20 & 873 & 126\\
 \bottomrule 
 \end{tabular}
-\captionof{table}{\color{Green} Classification performance of all tools on single-end datasets}
+\captionof{table}{Classification performance of all tools on single-end datasets}
 \end{center}\vspace{1cm}
 
 \begin{center}\vspace{1cm}
@@ -229,7 +255,7 @@ Kaiju && 21.69/47.68/29.82 & 55.64/85.83/67.51 & 175  & 32.21/72.08/44.53 & 50.8
 Kraken & 31mer & 34.09/56.24/42.45 & 66.92/91.96/77.47 & 454 & 73.44/84.35/78.52 & 88.63/97.42/92.82 & 213 & 126 \\
 \bottomrule
 \end{tabular}
-\captionof{table}{\color{Green} Classification performance of all tools on paired-end datasets}
+\captionof{table}{Classification performance of all tools on paired-end datasets}
 \end{center}\vspace{1cm}
 
 \begin{center}\vspace{1cm}
@@ -240,11 +266,6 @@ Kraken & 31mer & 34.09/56.24/42.45 & 66.92/91.96/77.47 & 454 & 73.44/84.35/78.52
 \cline{3-5}
 & & Sen/Acc/F1-score & GB & KSeq/m\\
 \midrule
-%deSPI & 24mer & 34.16/76.91/47.31 & 34.16/72.82/46.51 \\
-%Centrifuge	 & & 34.51/72.10/46.68 & 34.51/68.43/45.88\\
-%Clark	 & 31mer & 24.57/96.57/39.17 & 24.57/85.75/38.19\\
-%Kaiju	 & & 48.97/35.86/41.40 & 48.97/39.72/43.87 \\
-%Kraken & 31mer & 27.93/86.75/42.25 & 27.93/81.85/41.65\\
 deSPI & 24mer & 34.16/76.91/\textbf{47.31} & 25 & 1025\\
 Centrifuge	 & & 34.51/72.10/46.68 & \textbf{9} & 971\\
 Clark	 & 31mer & 24.57/\textbf{96.57}/39.17 & 70 & 1630\\
@@ -252,7 +273,7 @@ Kaiju	 & & \textbf{48.97}/35.86/41.40 & 14 & 319\\
 Kraken & 31mer & 27.93/86.75/42.25 & 126 & \textbf{1673}\\
 \bottomrule
 \end{tabular}
-\captionof{table}{\color{Green} Classification performance of all tools on real metagenomics datasets}
+\captionof{table}{Classification performance of all tools on real metagenomics datasets}
 \end{center}\vspace{1cm}
 %Donec faucibus purus at tortor egestas eu fermentum dolor facilisis. Maecenas tempor dui eu neque fringilla rutrum. Mauris \emph{lobortis} nisl accumsan. Aenean vitae risus ante.
 %
@@ -321,6 +342,17 @@ Herein, we propose a novel algorithm, deSPI, for the classification of metagenom
 \color{DarkSlateGray} % Set the color back to DarkSlateGray for the rest of the content
 
 %----------------------------------------------------------------------------------------
+%	ACKNOWLEDGEMENTS
+%----------------------------------------------------------------------------------------
+
+\section*{Acknowledgements}
+
+This work has been supported by the National Key Research and Development Program of China (No. 2018YFC0910504 and No. 2017YFC0907500), and China Scholarship Council. And we thank Richard Durbin for comments on the manuscript.
+
+%----------------------------------------------------------------------------------------
+
+
+%----------------------------------------------------------------------------------------
 %	FORTHCOMING RESEARCH
 %----------------------------------------------------------------------------------------
 
@@ -336,15 +368,7 @@ Herein, we propose a novel algorithm, deSPI, for the classification of metagenom
 \bibliographystyle{plain} % Plain referencing style
 \bibliography{deSPI-refs.bib} % Use the example bibliography file sample.bib
 
-%----------------------------------------------------------------------------------------
-%	ACKNOWLEDGEMENTS
-%----------------------------------------------------------------------------------------
 
-\section*{Acknowledgements}
-
-This work has been supported by the National Key Research and Development Program of China (No. 2018YFC0910504 and No. 2017YFC0907500), and China Scholarship Council. And we thank Richard Durbin for comments on the manuscript.
-
-%----------------------------------------------------------------------------------------
 
 \end{multicols}
 \end{document}
