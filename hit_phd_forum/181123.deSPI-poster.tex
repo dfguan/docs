@@ -21,7 +21,7 @@
 \documentclass[a0,portrait]{a0poster}
 
 \usepackage{geometry}
-\geometry{paperwidth=80cm,paperheight=121cm, left=6.5cm,right=2cm, top = 5cm, bottom = 0cm}
+\geometry{paperwidth=80cm,paperheight=122cm, left=6.5cm,right=2cm, top = 5cm, bottom = 0cm}
 
 \usepackage{multicol} % This is so we can have multiple columns of text side-by-side
 \columnsep=100pt % This is the amount of white space between the columns in the poster
@@ -100,6 +100,8 @@
 
 \begin{abstract}
 One of the core problems in metagenomics is the classification of shotgun sequencing reads to identify species present in samples. Many supervised classification tools have been developed recently, but they either consume large memory or large computation time. Herein we propose a new classification method, de Bruijn Graph-based Species Identifier (deSPI), which takes advantage of de Bruijn graph and FM-index data structures and a hierarchical top-down strategy to do classification. The experimental results suggest that deSPI uses much less memory than Clark and Kraken and classifies reads much faster than Centrifuge and Kaiju, while maintaining a comparable sensitivity and accuracy.
+
+\textbf{Souce code}: deSPI is available at https://github.com/dfguan/deSPI.
 \end{abstract}
 
 %----------------------------------------------------------------------------------------
