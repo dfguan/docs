@@ -18,10 +18,18 @@
 %	PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
 %----------------------------------------------------------------------------------------
 
-\documentclass[a0,portrait]{a0poster}
+\documentclass[a0,portrait, svgnames]{a0poster}
 
 \usepackage{geometry}
-\geometry{paperwidth=80cm,paperheight=122cm, left=6.5cm,right=2cm, top = 5cm, bottom = 0cm}
+\geometry{paperwidth=80cm,paperheight=140cm, left=6.5cm,right=2cm, top = 5cm, bottom = 0cm}
+\usepackage{tikz}
+\usepackage{pgfmath, pgffor}
+\usetikzlibrary{positioning, calc}
+\usetikzlibrary{shapes.misc}
+\usetikzlibrary{decorations.pathreplacing, arrows, decorations.markings}
+
+\tikzstyle{overbrace text style}=[font=\scriptsize, above, midway, yshift=3mm]
+\tikzstyle{overbrace style}=[decorate,decoration={brace,raise=2mm,amplitude=3pt}]
 
 \usepackage{multicol} % This is so we can have multiple columns of text side-by-side
 \columnsep=100pt % This is the amount of white space between the columns in the poster
@@ -29,7 +37,7 @@
 %\setlength{\paperwidth}{90cm}
 %\setlength{\paperheight}{150cm}
 
-\usepackage[svgnames]{xcolor} % Specify colors by their 'svgnames', for a full list of all colors available see here: http://www.latextemplates.com/svgnames-colors
+\usepackage{xcolor} % Specify colors by their 'svgnames', for a full list of all colors available see here: http://www.latextemplates.com/svgnames-colors
 
 \usepackage{times} % Use the times font
 %\usepackage{palatino} % Uncomment to use the Palatino font
@@ -114,7 +122,7 @@ One of the core problems in metagenomics is the classification of shotgun sequen
 
 Metagenomics has become a major technique to study the microbiome over the last decades. It can help to uncover the complexity of a microbial community in a specific environment, analyze correlation between the community with the environment, and discover new microbial species that cannot be cultivated in the laboratory. With the development of next-generation sequencing (NGS) technologies and decrease of sequencing cost, ever larger metagenomics sequencing data sets are being produced. While these give us more opportunities to perform microbiome analysis, they also generate many analytical challenges. One of the major computational challenges is metagenomics classification. 
 
-In recent years, numerious supervised metagenomics classification tools that scale efficiently while maintaining sensitivity are developed. Many of them are based on short exact matches. Among these tools, Kraken \cite{Wood2014-es}, Clark \cite{Ounit2015-fi}, Centrifuge \cite{Kim2016-zf}, Kaiju \cite{Menzel2016-mi}, are now being widely used in metagenomics classification. However they either require large memory,  or have low efficiency is relatively low. Herein, we propose deSPI, a novel short exact match based metagenomic read classification tool, which has higher speed and affordable memory cost with higher or comparable sensitivity and accuracy. 
+In recent years, numerious supervised metagenomics classification tools are developed. Many of them are based on short exact matches. Among these tools, Kraken \cite{Wood2014-es}, Clark \cite{Ounit2015-fi}, Centrifuge \cite{Kim2016-zf}, Kaiju \cite{Menzel2016-mi}, are now being widely used. However they either consume a large amount of memory or take too much time to classify. Herein, we propose deSPI, a novel short exact match based metagenomic read classification tool, which has higher speed and affordable memory cost with higher or comparable sensitivity and accuracy. 
 
 %----------------------------------------------------------------------------------------
 %	OBJECTIVES
@@ -143,12 +151,231 @@ In recent years, numerious supervised metagenomics classification tools that sca
 deSPI infers taxa of reads through a FM-index and hierarchical top-down taxonomic classification. In the indexing phase (Figure 1), deSPI takes a reference database and its corresponding phylogenetic tree as inputs. Instead of indexing original genomic sequences, it builds a FM-index of unitigs from the de Bruijn graph of references (RdBG) for both strands \cite{Liu2016-vy}, and each unitig is labeled with a taxon. In the classification phase (Figure 2), it applies a sparse seeding strategy to find maximal exact matches between reads and unitigs (U-MEMs) and infer taxa of the reads with a hierarchical top-down taxonomic classification strategy. 
 
 \begin{center}\vspace{1cm}
-\includegraphics[width=0.7\linewidth]{irg1}
+
+\def\refs{{"AGCTATCGCATGT","ATCGCATGTGTACGATC","TGTCAGTA"}}
+\def\refsAnota{{"G1 (Taxon=A)","G2 (Taxon=B)","G3 (Taxon=C)"}}
+\def\nodelabels{{"AGCT","GCTA","CTAT","TATC","ATCG","TCGC","CGCA","GCAT","CATG","ATGT","TGTC","GTCA","TCAG","CAGT","AGTA","TGTG", "GTGT","TGTA", "GTAC","TACG","ACGA","CGAT","GATC"
+}}
+
+
+\begin{tikzpicture}
+
+%%part a
+%\draw [step=0.5cm,gray, very thin] (0,0) grid(20,24);
+\begin{scope}
+\node (a) at (0,22) {\large\textbf{A}};
+
+\node(atitle) [right=of a, xshift=-1cm] {\large\textbf{reference genomes}};
+\foreach \i in {0,...,2} {
+	\ifnum \i = 2
+		\node (g\i) at (\i * 10 + 10.5,21.25)[xshift=-5mm] {\small{\pgfmathparse{\refs[\i]}\pgfmathresult}};
+	\else {
+		\ifnum \i = 1
+			\node (g\i) at (\i * 10 + 13.5,21.25)[xshift=-5mm] {\small{\pgfmathparse{\refs[\i]}\pgfmathresult}};
+		\else 
+			\node (g\i) at (\i * 10 + 14.5,21.25) {\small{\pgfmathparse{\refs[\i]}\pgfmathresult}};
+		\fi
+	}
+	\fi
+	\draw [overbrace style] (g\i.north west) -- (g\i.north east) node[overbrace text style]{\pgfmathparse{\refsAnota[\i]}\pgfmathresult};
+}
+\end{scope}
+\draw[line width= 0.5mm] (0,20) -- (34,20);
+
+%part b
+
+%draw annotation part
+\begin{scope}[
+every node/.style={inner sep=0pt, minimum size=7pt},
+%every label/.style = {yshift=-5mm, below, font=\tiny},
+gone/.style={circle, fill=cyan,xshift=.25cm},
+gtwo/.style={circle, fill=red,xshift=.25cm},
+gthree/.style={circle, fill=purple,xshift=.25cm},
+gfor/.style={circle,fill=blue,inner sep=0pt}
+]
+\node (b)[below=3.5cm of a] {\large\textbf{B}};
+\node(btitle) [right=of b, align=center, xshift=-0.45cm] {\large\textbf{RdBG}};
+
+%draw body
+\def\sty{{"one","two","three","for"}}
+\foreach \i in {0,...,22} {
+	\ifnum \i < 4 {
+		\ifnum \i = 0 {
+			\node [gone] (gn\i) [xshift=5.5cm, right=of btitle][label={[yshift=-5mm,below]\tiny{\pgfmathparse{\nodelabels[\i]}\pgfmathresult}}] {};			
+		} 
+		\else {
+			\pgfmathsetmacro{\de}{int(\i-1)}				
+			\node[gone] (gn\i) [right=of gn\de][label={[yshift=-5mm,below]\tiny{\pgfmathparse{\nodelabels[\i]}\pgfmathresult}}]
+			{} edge [<-,cyan] (gn\de);	
+		}
+		\fi 	
+	}
+	\else {
+		\ifnum \i < 10 {
+			\ifnum \i = 4  {
+				\pgfmathsetmacro{\de}{int(\i-1)}				
+				\node [gtwo] (gn\i) [right=of gn\de][label={[yshift=-5mm,below]\tiny{\pgfmathparse{\nodelabels[\i]}\pgfmathresult}}] {} edge[<-,cyan] (gn\de);	
+			} 
+			\else {
+				\pgfmathsetmacro{\de}{int(\i-1)}				
+				\node [gtwo] (gn\i) [right=of gn\de][label={[yshift=-5mm,below]\tiny{\pgfmathparse{\nodelabels[\i]}\pgfmathresult}}] {} edge[<-,red] (gn\de);	
+			
+			}
+			\fi
+		}
+		\else {
+			\ifnum \i < 15	{
+				\ifnum \i = 10 {
+						\pgfmathsetmacro{\de}{int(\i-1)}	
+						\node [gthree] (gn\i) [xshift=5mm][right=of gn\de][label={[yshift=-5mm,below]\tiny{\pgfmathparse{\nodelabels[\i]}\pgfmathresult}}] {};			
+				}
+				\else {
+						\pgfmathsetmacro{\de}{int(\i-1)}
+						\node [gthree] (gn\i) [right=of gn\de][label={[yshift=-5mm,below]\tiny{\pgfmathparse{\nodelabels[\i]}\pgfmathresult}}] {} edge[<-, purple] (gn\de);
+				}
+				\fi		
+			}	
+			\else {
+				\ifnum \i = 15 {
+				                \pgfmathsetmacro{\de}{int(24 - \i)}	
+						\node [gfor] (gn\i) [below=of gn\de][label={[yshift=-5mm,below]\tiny{\pgfmathparse{\nodelabels[\i]}\pgfmathresult}}] {};	
+				} 
+				\else {
+						\pgfmathsetmacro{\ds}{int(24 - \i)}
+						\pgfmathsetmacro{\dt}{int(\i-1)}
+						\node [gfor] (gn\i) [below=of gn\ds][label={[yshift=-5mm,below]\tiny{\pgfmathparse{\nodelabels[\i]}\pgfmathresult}}] {} edge [<-,blue] (gn\dt);			
+				}
+				\fi
+			}			
+			\fi
+		}
+		\fi
+	}		
+	\fi
+
+}
+\draw [<-,bend right=90, blue] (gn15) edge (gn9);
+\node [circle,draw][xshift=-10mm,yshift=-7mm][above right=of gn9][label=above:\tiny{G1-E}]{} edge [<-,red] (gn9);
+\node [circle,draw][xshift=10mm,yshift=-7mm][above left=of gn10][label=above:\tiny{G3-S}]{} edge [->,purple] (gn10);
+\node [circle,draw][xshift=-1mm] [right=of gn14][label={[yshift=-5mm,below]\tiny{G3-E}}] {} edge[<-,purple] (gn14);
+\node [circle,draw][xshift=10mm,yshift=-7mm][above left=of gn4][label=above:\tiny{G2-S}]{} edge [->,red] (gn4);
+\node [circle,draw][xshift=10mm,yshift=-7mm][above left=of gn0][label=above:\tiny{G1-S}]{} edge [->,cyan] (gn0);
+\node [circle,draw][xshift=-1mm][below=of gn1][label={[yshift=-5mm,below]\tiny{G2-E}}]{} edge [<-,blue] (gn22);
+\end{scope}
+\draw[line width= 0.5mm] (0,15) -- (34,15);
+
+%part c
+\begin{scope}[
+rect/.style={draw,rectangle,thick, align=center,minimum width=3.5cm, minimum height=1cm}
+]
+\node (c) [below=3.5cm of b] {\large\textbf{C}};
+\node (ctitle) [right=of c, xshift=-1cm]{\large\textbf{the unitigs of RdBG}};
+\node (c1) [rect,right=of ctitle, cyan, xshift=1cm] {\small{\textbf{U}$_1$:AGCTATC}\\\scriptsize\textbf{Taxon=A}};
+\node (c2) [rect,right=of c1,red] {\small{\textbf{U}$_2$:ATCGCATGT}\\\scriptsize\textbf{Taxon=D=LCA(A,B)}} edge[<-,cyan] (c1);
+\node [rect,below = of c2,blue, xshift=-.45cm, yshift=2mm] {\small{\textbf{U}$_3$:TGTGTACGATC}\\\scriptsize\textbf{Taxon=B}} edge [<-, bend right = 90, blue] (c2);
+\node [rect,right = of c2,purple, xshift=1cm] {\small{\textbf{U}$_4$:TGTCAGTA}\\\scriptsize\textbf{Taxon=C}};
+\end{scope}
+\draw[line width= 0.5mm] (0,8.5) -- (34,8.5);
+
+%part d
+\begin{scope} [
+rect/.style={draw,rectangle,thick, align=left}
+]
+\node (d) [below = 5.5cm of c] {\large\textbf{D}};
+\node (dtitle) [right = of d, xshift=-1cm] {\large\textbf{indexing}};
+\node (d1) [rect,right = of dtitle, xshift=2cm] {\small{U$_1$\#U$_2$\#U$_3$\#U$_4$\$}};
+\draw [overbrace style] (d1.north west) -- (d1.north east) node [overbrace text style] {\small{U-string}};
+\node (d2) [rect, right = of d1,xshift=1.5cm] {\small{CCTATT\$CTG\#CTTTGATGCCATATTTGGGCAAGAAG\#\#}}
+edge [<-, midway,above] node{\small{BWT}} (d1);
+\draw [overbrace style] (d2.north west) -- (d2.north east) node [overbrace text style] {\small{BWT(U-string)}};
+
+\end{scope}
+
+\end{tikzpicture}
 \captionof{figure}{Index Reference Genomes. (\textbf{A}) A library of reference genomes. (\textbf{B}) Build de Bruijn Graph (RdBG) of the reference database. (\textbf{C}) Obtain unitigs from RdBG, each unitig is labeled with a LCA of the organisms containing the unitig. (\textbf{D}) Obtain U-string through joining all unitigs together with a delimiter \#, perform Burrow-Wheeler Transformation on U-string and generate FM-index. }
 \end{center}\vspace{1cm}
 
 \begin{center}\vspace{1cm}
-\includegraphics[width=0.7\linewidth]{cor1}
+\begin{tikzpicture}
+\tikzstyle{myarrows}=[line width=1mm,draw=blue,-triangle 45,postaction={draw, line width=3mm, shorten >=4mm, -}]
+\tikzstyle{vecArrow} = [thick, decoration={markings,mark=at position
+   1 with {\arrow[semithick]{open triangle 60}}},
+   double distance=1.4pt, shorten >= 5.5pt,
+   preaction = {decorate},
+   postaction = {draw,line width=1.4pt, white,shorten >= 4.5pt}]
+
+%part a
+%\draw [step=0.5cm,gray, very thin] (0,0) grid(20,24);
+\node (A) at(0,22) {\large\textbf{A}};
+
+\draw [cyan] (2,21.5) -- (30,21.5) node [midway, above=5mm, cyan] {read(100 bp)} ;
+%\coordinate (start) at (2,20.5); 
+\pgfmathsetmacro{\ym}{0.25};
+\foreach [count=\xi from 0] \x / \y in {42/100,42/67,5/63,0/30} {	
+	\pgfmathsetmacro{\sycoor}{20-\xi * 1.2};			
+	\pgfmathsetmacro{\sxcoor}{2+\x/100 * 28};	
+	\coordinate (s\xi) at (\sxcoor, \sycoor);
+	\pgfmathsetmacro{\excoor}{2+\y/100 * 28};  	
+	\coordinate (e\xi) at (\excoor,\sycoor);	
+}
+\begin{scope}[every node/.style={above,midway,yshift=-1mm, font=\small}]
+\draw [red] (s0) -- (e0) node [label={[below]Taxon A}]{58-bp};
+\draw [gray] (s1) -- (e1) node {25-bp};
+\draw [red] (s2) -- (e2) node [label={[below]Taxon D}]{58-bp};
+\draw [red] (s3) -- (e3) node [label={[below]Taxon C}]{30-bp};
+\end{scope}
+\node [draw,cross out, minimum size=1pt, orange] at ($(s1)!0.5!(e1)$) {};
+
+%\draw[line width= 0.5mm] (0,15) -- (34,15);
+
+%part B
+\node (B) [below = 7.5cm of A] {\large\textbf{B}};
+\node (B1) [right = of B, yshift = -10mm,xshift = 7mm, cyan, minimum width = 20cm, draw, rectangle, text width=22cm, text = gray] {
+	Score(Taxon A) =  Weight(A) + Weight(D) + Weight(r) = 46 \\
+	Score(Taxon C) =   Weight(C) + Weight(E) + Weight(r) = 5\\
+	Score(Taxon D) =  Weight(D) + Weight(r) = 23 \\
+};
+\begin{scope}[
+sibling distance = 5cm, 
+level distance = 4cm,
+every node/.style={draw, circle, minimum size=1cm}] 
+%\node [below = of B1, label={[below left= 0cm and 5cm]\textbf{Root}}, fill=cyan,draw=cyan] {r:0} 
+\node [below = of B1, yshift=-2cm, xshift = -4cm] {\small{r}} 
+child {
+	node [label={[below left=-0.1cm and 3.6cm]\textbf{}}, fill=cyan,draw=cyan]{\small{D}} 
+	edge from parent [<-]
+	child {node [label={[below left=-2mm and 2cm]\textbf{}}, fill=cyan,draw=cyan]{\small{A}}}  
+	child{node{\small{B}}}
+	edge from parent [<-]	
+}
+child{
+	node [text=black]{\small{E}} edge from parent [<-]
+	child{ node[fill=cyan,text=black, xshift=2.2cm, yshift=-0.1cm, draw=cyan] {\small{C}}}
+	edge from parent [<-]
+};
+\node [below = of B1, draw=none, rectangle, xshift=-3.75cm, yshift=-12.5cm] {Phylogenetic Tree} ;
+\end{scope}
+\coordinate (a) at (14.75,3.5);
+\coordinate (b) at (16.75,3.5) ;
+\draw [vecArrow, fill=cyan] (a) to (b);
+\begin{scope}[
+sibling distance = 5cm, 
+level distance = 4cm,
+every node/.style={draw, circle, minimum size=1cm}] 
+\node [below = of B1, yshift=-2cm,xshift=9cm] {\scriptsize{r:0}} 
+child[cyan] {
+	node [label={[below left=-0.1cm and 3.6cm]\textbf{}}, fill=cyan, draw = cyan, text=black]{\scriptsize{D:23}} 
+	edge from parent [<-]
+	child { node[xshift=-2.2cm, fill=cyan, draw=cyan, text=black]{\scriptsize{A:23}}}  
+}
+child{
+	node [text=black]{\scriptsize{E:0}} edge from parent [<-]
+	child{ node[fill=cyan,text=black, xshift=2.3cm, yshift=-0.1cm, draw=cyan] {\scriptsize{C:5}}}
+	edge from parent [<-]
+};
+\node [below = of B1, draw=none, rectangle, xshift=9cm, yshift=-12.5cm] {Pruned Subtree} ;
+\end{scope}
+\end{tikzpicture}
 \captionof{figure}{Classification of a read. The figure illustrates the deSPI classification algorithm using seed length 25. (\textbf{A}) deSPI performs backward search along the read, find all U-MEMs larger than the minimum seed length. (\textbf{B}) Nodes receiving hits (highlighted in cyan) form a pruned phylogenetic tree, deSPI traverses the tree to figure out the classification path (nodes and edges highlighted in cyan).}
 \end{center}\vspace{1cm}
 %Fusce magna risus, molestie ut porttitor in, consectetur sed mi. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Pellentesque consectetur blandit pellentesque. Sed odio justo, viverra nec porttitor vel, lacinia a nunc. Suspendisse pulvinar euismod arcu, sit amet accumsan enim fermentum quis. In id mauris ut dui feugiat egestas. Vestibulum ac turpis lacinia nisl commodo sagittis eget sit amet sapien.
@@ -194,8 +421,9 @@ deSPI infers taxa of reads through a FM-index and hierarchical top-down taxonomi
 
 \section*{Results}
 Three experiments were carried out on simulated and real datasets, to assess the feasibility of deSPI. Four state-of-the-art metagenomics classification tools, Centrifuge, Clark, Kaiju and Kraken are tested on the same datasets for comparison. The \textit{k-mer} used for indices of Clark and Kraken, and RdBG of deSPI is 31. deSPI was tested with seed lengths of 24, 28 and 31, while the other tools were ran with their default settings. For simulated data and real sequencing data from single individuals, the tests were run on a server with 1TB of Random Access Memory (RAM), eight 2.0 GHZ Intel Xeon E7-4820 CPUs (64 cores). For the real metagenomic data, the test was performed on a server with 767.8 GB of RAM, fifty-six 2.6 GHZ Intel Xeon E5-2690 CPUs (784 cores). 
-%\section*{Results}
-%Three experiments were carried out on simulated and real datasets, to assess the feasibility of deSPI. Four state-of-the-art metagenomics classification tools, Centrifuge, Clark, Kaiju and Kraken are tested on the same datasets for comparison. The \textit{k-mer} used for indices of Clark and Kraken, and RdBG of deSPI is 31. deSPI was tested with seed lengths of 24, 28 and 31, while the other tools were ran with their default settings. For simulated data and real sequencing data from single individuals, the test were run on a server with 1TB of Random Access Memory (RAM), eight 2.0 GHZ Intel Xeon E7-4820 CPUs (64 cores). For the real metagenomic data, the test were performed on a server with 767.8 GB of RAM, fifty-six 2.6 GHZ Intel Xeon E5-2690 CPUs (784 cores). 
+
+We compared the classification accuracy of deSPI with the other four methods at both species and genus levels. Here we defined rank level sensitivity (Sen in Table 1, 2, 3) as $A/B$, where $A$ is the number of reads with a correct assigned taxon at the measured rank and $B$ is the number of reads to be classified, accuracy (Acc in Table 1, 2, 3) as $A/(C+D)$, where $C$ is the number of reads with assigned taxon at or below the measured rank, $D$ is the number of reads with an incorrect assigned taxon above the measured rank, and F1-score (F1-score in Table 1, 2, 3) as harmonic mean of sensitivity and accuracy.  
+
 \begin{center}\vspace{1cm}
 \small
 \begin{tabular}{cccccc}
@@ -213,7 +441,7 @@ Kaiju & & 40.23/95.56/56.62 & 63.38/98.17/77.03 & 14 & 195 \\
 Kraken & 31mer & 71.83/99.26/83.34 & 89.39/99.78/94.30 & 126 & 722 \\
 \bottomrule
 \end{tabular}
-\captionof{table}{Classification performance for deSPI, Centrifuge, Clark, Kaiju and Kraken on simulated reads}
+\captionof{table}{Classification performance for deSPI, Centrifuge, Clark, Kaiju and Kraken on 20 million simulated reads}
 \end{center}\vspace{1cm}
 
 \begin{center}\vspace{1cm}
@@ -235,7 +463,7 @@ Kaiju	 & & 19.09/91.18/31.57 & 30.11/95.44/45.78 & 262 & 9.21/62.14/16.04 & 42.8
 Kraken & 31mer & 33.89/97.32/50.27 & 47.29/98.66/63.93 & 1143 & 20.89/73.70/32.55 & 54.92/97.27/70.20 & 873 & 126\\
 \bottomrule 
 \end{tabular}
-\captionof{table}{Classification performance of all tools on single-end datasets}
+\captionof{table}{Classification performance of all tools on 35 single-end datasets}
 \end{center}\vspace{1cm}
 
 \begin{center}\vspace{1cm}
@@ -257,7 +485,7 @@ Kaiju && 21.69/47.68/29.82 & 55.64/85.83/67.51 & 175  & 32.21/72.08/44.53 & 50.8
 Kraken & 31mer & 34.09/56.24/42.45 & 66.92/91.96/77.47 & 454 & 73.44/84.35/78.52 & 88.63/97.42/92.82 & 213 & 126 \\
 \bottomrule
 \end{tabular}
-\captionof{table}{Classification performance of all tools on paired-end datasets}
+\captionof{table}{Classification performance of all tools on 519 paired-end datasets}
 \end{center}\vspace{1cm}
 
 \begin{center}\vspace{1cm}
@@ -275,7 +503,7 @@ Kaiju	 & & \textbf{48.97}/35.86/41.40 & 14 & 319\\
 Kraken & 31mer & 27.93/86.75/42.25 & 126 & \textbf{1673}\\
 \bottomrule
 \end{tabular}
-\captionof{table}{Classification performance of all tools on real metagenomics datasets}
+\captionof{table}{Classification performance of all tools on 11 real metagenomics datasets. We use classification result of Megablast\cite{Altschul1990-bz} as a pseudo grand truth set. We defined $A$ as the number of correctly classified reads, $B$ as the number of total reads, $C$ as the number of classified reads. And we calculate accuracy as $A/C$, sensitivity as $C/B$, and F1-score as harmonic mean of sensitivity and accuracy.}
 \end{center}\vspace{1cm}
 %Donec faucibus purus at tortor egestas eu fermentum dolor facilisis. Maecenas tempor dui eu neque fringilla rutrum. Mauris \emph{lobortis} nisl accumsan. Aenean vitae risus ante.
 %
@@ -333,6 +561,8 @@ Kraken & 31mer & 27.93/86.75/42.25 & 126 & \textbf{1673}\\
 
 \section*{Conclusions}
 Herein, we propose a novel algorithm, deSPI, for the classification of metagenomics reads. deSPI indexes unitigs of a de Bruijn graph of a reference database with FM-index, and performs top-down hierarchical taxonomic classification to infer the reads' label. One of the advantages of deSPI is that, with its innovative genome indexing approach, it can use several folds smaller RAM space than \textit{k-mer} index based approaches like Kraken and Clark, to achieve similar speed, which is faster than other proposed approaches using small size index, e.g., Centrifuge and Kaiju. As the memory footprint is only around 25 GB when using all RefSeq complete genome sequences as reference, deSPI can fit to the configurations of most modern PCs and workstations. Moreover, the classification results on hundreds of simulated and real sequencing datasets demonstrated that, in most cases, deSPI can achieve overall the best classification results (F1-score), and its accuracy is also comparable to (if not higher than) state-of-the-art approaches. Considering its lightweight, fast speed and relatively good classification ability, we believe deSPI can have enormous potential to be applied in metagenomics data analysis. 
+
+We will focus on two studies in the future. One is to develop a fast approach to build the FM-index of unitigs for a large reference database, e.g., RefSeq database. Currently it takes almost 5 days, 500 Gigabytes for deSPI to build the index for complete RefSeq bacterial, archaeal and viral genomes with default settings on a server with 1TB RAM, eight 2.0 GHZ Intel Xeon E7-4820 CPUs (64 cores), it is computationally expensive.  The other one is to further improve the sensitivity and accuracy of deSPI. 
 
 %\begin{itemize}
 %\item Pellentesque eget orci eros. Fusce ultricies, tellus et pellentesque fringilla, ante massa luctus libero, quis tristique purus urna nec nibh. Phasellus fermentum rutrum elementum. Nam quis justo lectus.
